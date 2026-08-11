@@ -1,4 +1,10 @@
 #Cloud Computing Laboratory
-Student Name:
-Student ID:
-Class:
+Student Name: Nhuy
+Student ID: 237399
+Class: DH23TIN09
+
+
+
+
+
+
