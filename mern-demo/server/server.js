@@ -1,49 +1,60 @@
-const express = require("express");
-const mongoose = require("mongoose");
-require("dotenv").config();
-
-const Student = require("./models/Student");
-
-const app = express();
+const express = require('express');
 const cors = require('cors');
-app.use(cors());
+const app = express();
 
-// Middleware đọc dữ liệu JSON từ request body
+app.use(cors());
 app.use(express.json());
 
-// Kết nối MongoDB Atlas
-mongoose.connect(process.env.MONGODB_URI)
-  .then(() => console.log("Connected to MongoDB Atlas"))
-  .catch(err => console.error("MongoDB Connection Error:", err));
+// Dữ liệu ban đầu đầy đủ 6 sinh viên của bạn
+let students = [
+  { id: 'SV01', name: 'Nguyễn Văn B', email: 'nva@gmail.com' },
+  { id: '237389', name: 'Dương Ngọc Thạch Như Ý', email: 's237389@nctu.edu.vn' },
+  { id: '237701', name: 'Lê Ngọc Bảo Trân', email: 's237701@nctu.edu.vn' },
+  { id: '234082', name: 'Dương Thị Kiều Vy', email: 's234082@nctu.edu.vn' },
+  { id: '237070', name: 'Đoàn Mỹ Nhi', email: 's237070@nctu.edu.vn' },
+  { id: '237729', name: 'Hồ Trương Thịnh', email: 's237729@nctu.edu.vn' }
+];
 
-// API kiểm tra server
-app.get("/api/hello", (req, res) => {
-    res.send("Backend đang hoạt động");
+// 1. [GET] Lấy danh sách sinh viên
+app.get('/api/students', (req, res) => {
+  res.json(students);
 });
 
-// API Lấy danh sách sinh viên (GET)
-app.get("/api/students", async (req, res) => {
-    try {
-        const students = await Student.find();
-        res.json(students);
-    } catch (error) {
-        res.status(500).json({ message: error.message });
-    }
+// 2. [POST] Thêm mới sinh viên
+app.post('/api/students', (req, res) => {
+  const newStudent = req.body;
+  students.push(newStudent);
+  res.status(201).json(newStudent);
 });
 
-// API Thêm mới sinh viên (POST)
-app.post("/api/students", async (req, res) => {
-    try {
-        const newStudent = new Student(req.body);
-        const savedStudent = await newStudent.save();
-        res.status(201).json(savedStudent);
-    } catch (error) {
-        res.status(400).json({ message: error.message });
-    }
+// 3. [PUT] Cập nhật sinh viên (Câu 61)
+app.put('/api/students/:id', (req, res) => {
+  const { id } = req.params;
+  const { name, email } = req.body;
+
+  const index = students.findIndex((s) => (s.id || s._id || s.mssv) === id);
+
+  if (index === -1) {
+    return res.status(404).json({ message: 'Không tìm thấy sinh viên!' });
+  }
+
+  students[index] = { ...students[index], name, email };
+  return res.status(200).json({ message: 'Cập nhật thành công!', data: students[index] });
+});
+
+// 4. [DELETE] Xóa sinh viên (Câu 62)
+app.delete('/api/students/:id', (req, res) => {
+  const { id } = req.params;
+  const initialLength = students.length;
+
+  students = students.filter((s) => (s.id || s._id || s.mssv) !== id);
+
+  if (students.length === initialLength) {
+    return res.status(404).json({ message: 'Không tìm thấy sinh viên để xóa!' });
+  }
+
+  return res.status(200).json({ message: 'Xóa sinh viên thành công!' });
 });
 
 const PORT = 5000;
-
-app.listen(PORT, () => {
-    console.log(`Server is running on port ${PORT}`);
-});
+app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
