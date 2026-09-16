@@ -1,122 +1,147 @@
-import { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 
-function App() {
-  const [students, setStudents] = useState([]);
-  
-  const [studentId, setStudentId] = useState('');
+export default function App() {
+  // Khai báo sẵn 6 sinh viên ngay trong state ban đầu
+  const [students, setStudents] = useState([
+    { id: 'SV01', name: 'Nguyễn Văn B', email: 'nva@gmail.com' },
+    { id: '237389', name: 'Dương Ngọc Thạch Như Ý', email: 's237389@ndu.edu.vn' },
+    { id: '237701', name: 'Lê Ngọc Bảo Trân', email: 's237701@ndu.edu.vn' },
+    { id: '234082', name: 'Dương Thị Kiều Vy', email: 's234082@ndu.edu.vn' },
+    { id: '237070', name: 'Đoàn Mỹ Nhi', email: 's237070@ndu.edu.vn' },
+    { id: '237729', name: 'Hồ Trương Thịnh', email: 's237729@ndu.edu.vn' }
+  ]);
+
+  const [id, setId] = useState('');
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
+  const [isEditing, setIsEditing] = useState(false);
 
-  const fetchStudents = () => {
-    fetch('https://stunning-doodle-5g6p5x6ggw4x2744x-5000.app.github.dev/api/students')
-      .then((res) => res.json())
-      .then((data) => setStudents(data))
-      .catch((err) => console.error('Lỗi API:', err));
+  // Thao tác Xóa (Câu 62)
+  const handleDelete = (studentId) => {
+    if (window.confirm(`Bạn có chắc chắn muốn xóa sinh viên ${studentId}?`)) {
+      setStudents(students.filter((s) => s.id !== studentId));
+      alert('Xóa sinh viên thành công!');
+    }
   };
 
-  useEffect(() => {
-    fetchStudents();
-  }, []);
+  const handleEditClick = (student) => {
+    setIsEditing(true);
+    setId(student.id);
+    setName(student.name);
+    setEmail(student.email);
+  };
 
   const handleSubmit = (e) => {
     e.preventDefault();
+    if (isEditing) {
+      setStudents(students.map((s) => (s.id === id ? { ...s, name, email } : s)));
+      alert('Cập nhật thành công!');
+      resetForm();
+    } else {
+      setStudents([...students, { id, name, email }]);
+      alert('Thêm sinh viên thành công!');
+      resetForm();
+    }
+  };
 
-    const newStudent = { studentId, name, email };
-
-    fetch('https://stunning-doodle-5g6p5x6ggw4x2744x-5000.app.github.dev/api/students', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(newStudent),
-    })
-      .then((res) => res.json())
-      .then(() => {
-        fetchStudents();
-        setStudentId('');
-        setName('');
-        setEmail('');
-      })
-      .catch((err) => console.error('Lỗi khi thêm sinh viên:', err));
+  const resetForm = () => {
+    setIsEditing(false);
+    setId('');
+    setName('');
+    setEmail('');
   };
 
   return (
-    <div className="notranslate" lang="vi" style={{ maxWidth: '650px', margin: '30px auto', padding: '20px', fontFamily: 'Arial, sans-serif' }}>
-      
-      <div style={{ background: '#f9f9f9', padding: '20px 25px', borderRadius: '8px', boxShadow: '0 2px 8px rgba(0,0,0,0.1)', marginBottom: '30px' }}>
-        <h2 style={{ textAlign: 'center', marginTop: 0, color: '#333' }}>Thêm Sinh Viên Mới</h2>
-        <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
-          
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '5px' }}>
-            <label style={{ fontWeight: 'bold', fontSize: '14px' }}>Mã SV:</label>
-            <input 
-              type="text" 
-              value={studentId} 
-              onChange={(e) => setStudentId(e.target.value)} 
-              placeholder="Nhập mã sinh viên (vd: SV02)"
-              required
-              style={{ padding: '8px 12px', border: '1px solid #ccc', borderRadius: '4px', fontSize: '14px' }}
-            />
-          </div>
+    <div style={{ padding: '30px', fontFamily: 'Arial, sans-serif', maxWidth: '900px', margin: '0 auto' }}>
+      <h2 style={{ textAlign: 'center' }}>Quản Lý Sinh Viên</h2>
 
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '5px' }}>
-            <label style={{ fontWeight: 'bold', fontSize: '14px' }}>Họ và Tên:</label>
-            <input 
-              type="text" 
-              value={name} 
-              onChange={(e) => setName(e.target.value)} 
-              placeholder="Nhập họ và tên"
-              required
-              style={{ padding: '8px 12px', border: '1px solid #ccc', borderRadius: '4px', fontSize: '14px' }}
-            />
-          </div>
+      <form onSubmit={handleSubmit} style={{ marginBottom: '25px', display: 'flex', gap: '10px' }}>
+        <input
+          type="text"
+          placeholder="Mã sinh viên (MSSV)"
+          value={id}
+          onChange={(e) => setId(e.target.value)}
+          disabled={isEditing}
+          required
+          style={{ padding: '8px', flex: '1' }}
+        />
+        <input
+          type="text"
+          placeholder="Họ và Tên"
+          value={name}
+          onChange={(e) => setName(e.target.value)}
+          required
+          style={{ padding: '8px', flex: '2' }}
+        />
+        <input
+          type="email"
+          placeholder="Email"
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
+          required
+          style={{ padding: '8px', flex: '2' }}
+        />
+        <button
+          type="submit"
+          style={{
+            padding: '8px 16px',
+            backgroundColor: isEditing ? '#007bff' : '#28a745',
+            color: '#fff',
+            border: 'none',
+            borderRadius: '4px',
+            cursor: 'pointer'
+          }}
+        >
+          {isEditing ? 'Lưu Cập Nhật' : 'Thêm Sinh Viên'}
+        </button>
+      </form>
 
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '5px' }}>
-            <label style={{ fontWeight: 'bold', fontSize: '14px' }}>Email:</label>
-            <input 
-              type="email" 
-              value={email} 
-              onChange={(e) => setEmail(e.target.value)} 
-              placeholder="Nhập địa chỉ email"
-              required
-              style={{ padding: '8px 12px', border: '1px solid #ccc', borderRadius: '4px', fontSize: '14px' }}
-            />
-          </div>
+      <h3 style={{ textAlign: 'center' }}>Danh Sách Sinh Viên</h3>
 
-          <button 
-            type="submit" 
-            style={{ 
-              marginTop: '10px',
-              padding: '10px', 
-              backgroundColor: '#007bff', 
-              color: '#fff', 
-              border: 'none', 
-              borderRadius: '4px', 
-              fontSize: '15px', 
-              fontWeight: 'bold',
-              cursor: 'pointer' 
-            }}
-          >
-            Thêm Sinh Viên
-          </button>
-        </form>
-      </div>
-
-      <h2 style={{ textAlign: 'center', color: '#333' }}>Danh sách Sinh Viên</h2>
-      <table border="1" cellPadding="10" style={{ borderCollapse: 'collapse', width: '100%', textAlign: 'center' }}>
-        <thead style={{ backgroundColor: '#f2f2f2' }}>
-          <tr>
-            <th>Mã SV</th>
+      <table border="1" cellPadding="10" cellSpacing="0" style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left' }}>
+        <thead>
+          <tr style={{ backgroundColor: '#f2f2f2' }}>
+            <th>MSSV</th>
             <th>Họ và Tên</th>
-            <th>E-mail</th>
+            <th>Email</th>
+            <th>Thao tác</th>
           </tr>
         </thead>
         <tbody>
           {students.map((student) => (
-            <tr key={student._id}>
-              <td>{student.studentId}</td>
+            <tr key={student.id}>
+              <td>{student.id}</td>
               <td>{student.name}</td>
               <td>{student.email}</td>
+              <td>
+                <button
+                  onClick={() => handleEditClick(student)}
+                  style={{
+                    backgroundColor: '#ffc107',
+                    color: '#000',
+                    border: 'none',
+                    padding: '6px 12px',
+                    marginRight: '5px',
+                    borderRadius: '4px',
+                    cursor: 'pointer'
+                  }}
+                >
+                  Sửa
+                </button>
+                <button
+                  onClick={() => handleDelete(student.id)}
+                  style={{
+                    backgroundColor: '#dc3545',
+                    color: '#fff',
+                    border: 'none',
+                    padding: '6px 12px',
+                    borderRadius: '4px',
+                    cursor: 'pointer'
+                  }}
+                >
+                  Xóa
+                </button>
+              </td>
             </tr>
           ))}
         </tbody>
@@ -124,5 +149,3 @@ function App() {
     </div>
   );
 }
-
-export default App;
