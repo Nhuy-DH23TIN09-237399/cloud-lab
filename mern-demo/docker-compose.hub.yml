@@ -1,0 +1,22 @@
+version: '3.8'
+
+services:
+  backend:
+    image: nhuy2005/mern-backend:1.0
+    ports:
+      - "5000:5000"
+    environment:
+      - MONGODB_URI=mongodb+srv://s237399_db_user:nhuy2801@cluster0.k6pouoc.mongodb.net/cloud_lab?retryWrites=true&w=majority
+    networks:
+      - mern-network
+
+  frontend:
+    image: nhuy2005/mern-frontend:2.0
+    ports:
+      - "5173:5173"
+    networks:
+      - mern-network
+
+networks:
+  mern-network:
+    driver: bridge
